@@ -38,6 +38,7 @@ export default function RecuperarPasswordPage() {
           <Link href="/" className="text-4xl font-bold tracking-tight md:text-5xl">
             <span className="text-white">Tel</span>
             <span className="text-[#3b82f6]">Tec</span>
+            <span className="text-[#28f061]"> Net</span>
           </Link>
         </div>
 

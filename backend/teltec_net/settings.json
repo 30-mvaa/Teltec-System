@@ -1,16 +1,7 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}/backend/venv/bin/python",
-  "python.linting.enabled": true,
-  "python.linting.pylintEnabled": true,
-  "python.formatting.provider": "black",
-  "editor.formatOnSave": true,
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  "python.analysis.extraPaths": [
+    "/Users/marcoandamarca/Desktop/internet-service-management/backend/venv/lib/python3.9/site-packages",
+    "/Users/marcoandamarca/Desktop/internet-service-management/backend/vendor_packages",
+    "/Users/marcoandamarca/Desktop/internet-service-management/backend/typings"
+  ]
 }

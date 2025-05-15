@@ -39,6 +39,20 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['first_name', 'last_name']
     
     objects = UserManager()
+    ROLE_CHOICES = (
+        ('administrador', 'Administrador'),
+        ('atencion_cliente', 'Atención al Cliente'),
+        ('cobros', 'Cobros'),
+    )
+    
+    username = None
+    email = models.EmailField(_('email address'), unique=True)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='atencion_cliente')
+    
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['first_name', 'last_name']
+    
+    objects = UserManager()
     
     def __str__(self):
         return self.email
