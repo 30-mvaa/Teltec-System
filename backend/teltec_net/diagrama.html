@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Diagrama Arquitectura MVC</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f8f9fa;
+      padding: 20px;
+    }
+    svg {
+      border: 1px solid #ccc;
+      background: white;
+      width: 100%;
+      max-width: 900px;
+      height: 600px;
+    }
+    text {
+      font-size: 14px;
+      fill: #333;
+    }
+    .box {
+      fill: #e3f2fd;
+      stroke: #2196f3;
+      stroke-width: 2;
+      rx: 8;
+      ry: 8;
+    }
+    .arrow {
+      stroke: #2196f3;
+      stroke-width: 2;
+      marker-end: url(#arrowhead);
+    }
+    .title {
+      font-weight: bold;
+      font-size: 18px;
+      fill: #0d47a1;
+    }
+  </style>
+</head>
+<body>
+  <h1>Diagrama Arquitectura MVC</h1>
+  <svg viewBox="0 0 900 600" xmlns="http://www.w3.org/2000/svg">
+
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" 
+              refX="10" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#2196f3"/>
+      </marker>
+    </defs>
+
+    <!-- Modelo -->
+    <rect x="50" y="80" width="250" height="350" class="box" />
+    <text x="175" y="110" class="title" text-anchor="middle">Modelo</text>
+    <text x="70" y="140">backend/clientes/models.py</text>
+    <text x="70" y="170">backend/dashboard/models.py</text>
+    <text x="70" y="200">backend/facturacion/models.py</text>
+    <text x="70" y="230">backend/users/models.py</text>
+    <text x="70" y="260">base de datos (db.sqlite3)</text>
+
+    <!-- Vista -->
+    <rect x="600" y="80" width="250" height="350" class="box" />
+    <text x="725" y="110" class="title" text-anchor="middle">Vista (Frontend)</text>
+    <text x="620" y="140">frontend/app/clientes/page.tsx</text>
+    <text x="620" y="170">frontend/app/dashboard/page.tsx</text>
+    <text x="620" y="200">frontend/app/facturacion/page.tsx</text>
+    <text x="620" y="230">frontend/app/login/page.tsx</text>
+    <text x="620" y="260">components/ui/*.tsx</text>
+    <text x="620" y="290">components/app-sidebar.tsx</text>
+    <text x="620" y="320">styles/globals.css</text>
+
+    <!-- Controlador -->
+    <rect x="330" y="80" width="220" height="350" class="box" />
+    <text x="440" y="110" class="title" text-anchor="middle">Controlador</text>
+  
+
+    <!-- Flechas -->
+    <!-- Vista -> Controlador -->
+    <line x1="600" y1="260" x2="550" y2="260" class="arrow" />
+    <text x="580" y="245" font-size="12" fill="#0d47a1" text-anchor="middle">Solicita datos</text>
+
+    <!-- Controlador -> Modelo -->
+    <line x1="330" y1="260" x2="300" y2="260" class="arrow" />
+    <text x="320" y="245" font-size="12" fill="#0d47a1" text-anchor="middle">Consulta/actualiza</text>
+
+    <!-- Modelo -> Controlador -->
+    <line x1="300" y1="280" x2="330" y2="280" class="arrow" />
+    <text x="320" y="295" font-size="12" fill="#0d47a1" text-anchor="middle">Devuelve datos</text>
+
+    <!-- Controlador -> Vista -->
+    <line x1="550" y1="280" x2="600" y2="280" class="arrow" />
+    <text x="580" y="295" font-size="12" fill="#0d47a1" text-anchor="middle">Renderiza respuesta</text>
+  </svg>
+</body>
+</html>
