@@ -4,8 +4,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.http import HttpResponse
 
+
 def home(request):
     return HttpResponse("""
+        
         <!DOCTYPE html>
         <html lang="es">
         <head>
@@ -99,8 +101,30 @@ def home(request):
 
         </body>
         </html>
+    """
+
+    )
 
 
+
+
+from django.contrib import admin
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from django.http import HttpResponse
+
+def home(request):
+    return HttpResponse("""
+    <h1 style="text-align: center; margin-top: 50px;">Bienvenido a Teltec Net API</h1>
+    <div style="text-align: center; margin-top: 20px;">
+        <p>Accede a:</p>
+        <ul style="list-style: none; padding: 0;">
+            <li><a href='/admin/'>Panel de Administración</a></li>
+            <li><a href='/api/clientes/clientes/'>API de Clientes</a></li>
+            <li><a href='/api/facturacion/pagos/'>API de Pagos</a></li>
+        </ul>
+    </div>
     """)
 
 urlpatterns = [
@@ -110,8 +134,10 @@ urlpatterns = [
     path('api/clientes/', include('clientes.urls')),
     path('api/facturacion/', include('facturacion.urls')),
     path('api/dashboard/', include('dashboard.urls')),
-    path('api-auth/', include('rest_framework.urls')),
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    
+
+

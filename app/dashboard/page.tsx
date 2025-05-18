@@ -58,16 +58,15 @@ const monthlyRevenue = [
 ]
 
 const clientesPorSector = [
-  { name: "Caguna", value: 35 },
-  { name: "Sisisd centro", value: 25 },
-  { name: "Tambo", value: 20 },
-  { name: "Cullcaloma", value: 15 },
-  { name: "Sisid chico", value: 5 },
-  { name: "Cañar", value: 5 },
+  { name: "Norte", value: 35 },
+  { name: "Sur", value: 25 },
+  { name: "Este", value: 20 },
+  { name: "Oeste", value: 15 },
+  { name: "Centro", value: 5 },
 ]
 
 const clientesPorPlan = [
-  { name: "Antena 50Mbps", value: 95 },
+  { name: "Fibra 50Mbps", value: 95 },
   { name: "Fibra 100Mbps", value: 85 },
   { name: "Fibra 200Mbps", value: 45 },
   { name: "Fibra 300Mbps", value: 23 },
@@ -92,6 +91,7 @@ export default function DashboardPage() {
     <div className="space-y-6 pb-10">
       {/* Header con barra de búsqueda y acciones */}
       <div className="sticky top-0 z-10 -mx-4 mb-6 bg-background/95 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6 lg:px-8">
+      
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h1 className="text-2xl font-bold tracking-tight md:text-3xl">Dashboard</h1>

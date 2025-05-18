@@ -1,13 +1,25 @@
+# En backend/users/views.py
+import logging
+
+logger = logging.getLogger(__name__)
+from rest_framework_simplejwt.views import TokenObtainPairView
+from .serializers import CustomTokenObtainPairSerializer
+from rest_framework.permissions import AllowAny
 from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
+from django.urls import path
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework import status, serializers
+from django.contrib.auth import authenticate, get_user_model
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 
 from .serializers import (
     UserSerializer,
@@ -21,22 +33,20 @@ User = get_user_model()
 # -----------------------
 # Login personalizado JWT
 # -----------------------
+ 
 class CustomTokenObtainPairView(TokenObtainPairView):
+    permission_classes = [AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
-
+    
     def post(self, request, *args, **kwargs):
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        user = authenticate(request, username=email, password=password)
-        if user is None:
-            return Response(
-                {"detail": "No se encontró una cuenta activa con esas credenciales."},
-                status=status.HTTP_401_UNAUTHORIZED
-            )
-
-        return super().post(request, *args, **kwargs)
-
+        logger.info(f"Intento de login: {request.data.get('email')}")
+        try:
+            response = super().post(request, *args, **kwargs)
+            logger.info(f"Login exitoso para: {request.data.get('email')}")
+            return response
+        except Exception as e:
+            logger.error(f"Cuenta no registrada {request.data.get('email')}: {str(e)}")
+            raise
 
 # -----------------------
 # Registro de usuario
@@ -147,3 +157,9 @@ class PasswordResetConfirmView(APIView):
 
         except (TypeError, ValueError, OverflowError, User.DoesNotExist):
             return Response({"error": "Usuario inválido."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+urlpatterns = [
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+]

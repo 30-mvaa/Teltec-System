@@ -113,8 +113,8 @@ AUTH_USER_MODEL = 'users.User'
 # CORS HEADERS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
-    "https://mi-dominio.com",
-    "https://www.mi-dominio.com",
+    "http://192.168.0.100:3000",
+    
 ]
 
 # FRONTEND URL PARA RESTABLECER CONTRASEÑA
@@ -124,28 +124,24 @@ FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
 }
 
 # JWT SETTINGS
+# En backend/teltec_net/settings.py
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=10),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'AUTH_HEADER_TYPES': ('Bearer',),
-    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
-    'TOKEN_TYPE_CLAIM': 'token_type',
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
-    'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
 }
 
 # PASSWORD RESET TIMEOUT (10 minutos)
@@ -158,9 +154,6 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'vangamarca4@gmail.com')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '12345678')
-
-
-
 
 # SECURITY SETTINGS
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'clave_secreta_insegura_para_desarrollo')
@@ -186,4 +179,8 @@ else:
     EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
-    
+
+
+
+
+
