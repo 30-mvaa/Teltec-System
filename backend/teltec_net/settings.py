@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt',
     'django_filters',
+    
 
     # Local apps
     'users',
@@ -79,8 +80,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'teltec_system',
-        'USER': 'marcoandamarca',
-        'PASSWORD': '12345678',
+        'USER': 'marcoangamarca',
+        'PASSWORD': '6606',
         'HOST': 'localhost',
         'PORT': '5432',
     }
@@ -153,7 +154,7 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', 'vangamarca4@gmail.com')
-EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '12345678')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '6606')
 
 # SECURITY SETTINGS
 SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'clave_secreta_insegura_para_desarrollo')

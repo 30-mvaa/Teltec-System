@@ -192,7 +192,7 @@ import { Formik, Form, Field, ErrorMessage } from "formik";
 // Esquema de validación
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Email inválido").required("El email es obligatorio"),
-  password: Yup.string().required("La contraseña es obligatoria").min(8, "La contraseña debe tener al menos 8 caracteres"),
+  password: Yup.string().required("La contraseña es obligatoria").min(4, "La contraseña debe tener al menos 4 caracteres"),
 });
 
 export default function LoginPage() {
