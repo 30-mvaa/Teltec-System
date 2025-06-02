@@ -1,0 +1,27 @@
+{
+  "venvPath": "/Users/marcoandamarca/Desktop/internet-service-management/backend",
+  "venv": "venv",
+  "reportMissingImports": false,
+  "pythonVersion": "3.9",
+  "pythonPlatform": "Darwin",
+  "extraPaths": [
+    "/Users/marcoandamarca/Desktop/internet-service-management/backend/venv/lib/python3.9/site-packages"
+  ],
+
+
+  "include": [
+    "backend"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "venv"
+  ],
+  "ignore": [
+    "backend/venv"
+  ],
+  
+}
+
+
+

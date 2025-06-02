@@ -1,0 +1,7 @@
+{
+  "python.analysis.extraPaths": [
+    "/Users/marcoandamarca/Desktop/internet-service-management/backend/venv/lib/python3.9/site-packages",
+    "/Users/marcoandamarca/Desktop/internet-service-management/backend/vendor_packages",
+    "/Users/marcoandamarca/Desktop/internet-service-management/backend/typings"
+  ]
+}
