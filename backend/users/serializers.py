@@ -1,69 +1,79 @@
-
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
+from django.contrib.auth.password_validation import validate_password
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+from .models import User
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'password', 'role']
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_active', 'role', 'date_joined']
+        read_only_fields = ['id', 'date_joined']
 
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
+    
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name', 'last_name', 'password', 'is_active', 'role']
+        extra_kwargs = {
+            'username': {'required': False},  # Username no es requerido
+        }
+    
     def create(self, validated_data):
+        # Si no se proporciona username, generarlo del email
+        if not validated_data.get('username'):
+            validated_data['username'] = validated_data['email'].split('@')[0]
+            
         user = User.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
-            first_name=validated_data.get('first_name', ''),
-            last_name=validated_data.get('last_name', ''),
-            role=validated_data.get('role', 'atencion_cliente')
+            username=validated_data['username'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name'],
+            is_active=validated_data.get('is_active', True),
+            role=validated_data.get('role', 'atencion_cliente'),
         )
         return user
 
-
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-
-        # Añadir datos personalizados al token
-        token['email'] = user.email
-        token['role'] = user.role
-        token['name'] = f"{user.first_name} {user.last_name}"
-        token['user_id'] = user.id
-
-        return token
-
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField(required=True)
+    password = serializers.CharField(required=True, write_only=True)
+    
     def validate(self, attrs):
-        # Validación del usuario (credenciales)
-        data = super().validate(attrs)
-
-        # Agregar información adicional al response
-        data['email'] = self.user.email
-        data['role'] = self.user.role
-        data['name'] = f"{self.user.first_name} {self.user.last_name}"
-        data['user_id'] = self.user.id
-
-        return data
-
+        email = attrs.get('email')
+        password = attrs.get('password')
+        
+        if email and password:
+            # Autenticar usando email
+            user = authenticate(username=email, password=password)
+            
+            if not user:
+                raise serializers.ValidationError('Credenciales inválidas')
+            
+            if not user.is_active:
+                raise serializers.ValidationError('Cuenta desactivada')
+            
+            # Generar tokens
+            refresh = RefreshToken.for_user(user)
+            
+            return {
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+                'user': UserSerializer(user).data
+            }
+        else:
+            raise serializers.ValidationError('Debe proporcionar email y contraseña')
 
 class ChangePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(required=True)
-    new_password = serializers.CharField(required=True)
+    new_password = serializers.CharField(required=True, validators=[validate_password])
+    confirm_password = serializers.CharField(required=True)
 
+    def validate(self, attrs):
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError("Las contraseñas no coinciden")
+        return attrs
 
-class ResetPasswordEmailSerializer(serializers.Serializer):
-    email = serializers.EmailField(required=True)
-
-
-# Añadir a los imports existentes
-from rest_framework import serializers
-
-# Añadir a los serializers existentes
-class ResetPasswordEmailSerializer(serializers.Serializer):
+class ResetPasswordSerializer(serializers.Serializer):
     email = serializers.EmailField(required=True)

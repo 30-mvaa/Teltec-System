@@ -134,6 +134,7 @@ urlpatterns = [
     path('api/clientes/', include('clientes.urls')),
     path('api/facturacion/', include('facturacion.urls')),
     path('api/dashboard/', include('dashboard.urls')),
+   
 ]
 
 if settings.DEBUG:

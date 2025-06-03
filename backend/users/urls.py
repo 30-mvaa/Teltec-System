@@ -1,25 +1,20 @@
-
-# En backend/users/urls.py
-from django.urls import path
-from rest_framework_simplejwt.views import TokenRefreshView
-from .views import CustomTokenObtainPairView
-
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from .views import (
-    CustomTokenObtainPairView,
-    RegisterView,
+    RegisterView, 
+    UserViewSet, 
+    LoginView,
     ChangePasswordView,
-    RequestPasswordResetView,
-    PasswordResetConfirmView
+    ResetPasswordView
 )
 
+router = DefaultRouter()
+router.register(r'', UserViewSet)
+
 urlpatterns = [
-    path('login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('login/', LoginView.as_view(), name='login'),
     path('register/', RegisterView.as_view(), name='register'),
     path('change-password/', ChangePasswordView.as_view(), name='change_password'),
-    path('request-reset-password/', RequestPasswordResetView.as_view(), name='request_reset_password'),
-     path('request-reset/', RequestPasswordResetView.as_view(), name='request-reset'),
-    path('reset-password/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='reset_password_confirm'),
-    path('request-reset-password/', RequestPasswordResetView.as_view(), name='request_reset_password'),
-    path('reset-password/<uidb64>/<token>/', PasswordResetConfirmView.as_view(), name='reset_password_confirm'),
+    path('reset-password/', ResetPasswordView.as_view(), name='reset_password'),
+    path('', include(router.urls)),
 ]

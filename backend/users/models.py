@@ -31,28 +31,32 @@ class User(AbstractUser):
         ('cobros', 'Cobros'),
     )
     
-    username = None
-    email = models.EmailField(_('email address'), unique=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='atencion_cliente')
-    
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
-    
-    objects = UserManager()
-    ROLE_CHOICES = (
-        ('administrador', 'Administrador'),
-        ('atencion_cliente', 'Atención al Cliente'),
-        ('cobros', 'Cobros'),
+    # Hacer que username no sea requerido
+    username = models.CharField(
+        _('username'),
+        max_length=150,
+        unique=True,
+        blank=True,
+        null=True,
+        help_text=_('Optional. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
     )
-    
-    username = None
     email = models.EmailField(_('email address'), unique=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='atencion_cliente')
     
+    # Configurar email como campo de login
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
     
     objects = UserManager()
+    
+    class Meta:
+        swappable = 'AUTH_USER_MODEL'
+    
+    def save(self, *args, **kwargs):
+        # Auto-generar username basado en email si no se proporciona
+        if not self.username:
+            self.username = self.email.split('@')[0]
+        super().save(*args, **kwargs)
     
     def __str__(self):
-        return self.email
+        return f"{self.first_name} {self.last_name} ({self.email})"

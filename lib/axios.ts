@@ -1,33 +1,50 @@
-// En frontend/src/lib/axios.ts
-// En frontend/src/lib/axios.ts
-import axios from "axios";
+import axios from "axios"
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
-
-const axiosInstance = axios.create({
-  baseURL,
+// Crear una instancia de axios con configuración básica
+const apiClient = axios.create({
+  baseURL: "http://localhost:8000", // Asegúrate de que esta URL sea correcta
   headers: {
     "Content-Type": "application/json",
   },
-});
+  withCredentials: true, // Para manejar cookies de sesión si es necesario
+})
 
-// Interceptor para añadir token a las peticiones - MODIFICADO
-axiosInstance.interceptors.request.use(
+// Interceptor para agregar token de autenticación
+apiClient.interceptors.request.use(
   (config) => {
-    // Verificar si estamos en el cliente
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem("token");
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    // Obtener token del almacenamiento local
+    const token = localStorage.getItem("access_token")
+
+    // Si hay token, agregarlo a los headers
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`
     }
-    return config;
+
+    return config
   },
   (error) => {
-    return Promise.reject(error);
-  }
-);
+    return Promise.reject(error)
+  },
+)
 
-// ... (resto del código igual)
+// Interceptor para manejar errores de respuesta
+apiClient.interceptors.response.use(
+  (response) => {
+    return response
+  },
+  (error) => {
+    // Manejar errores 401 (no autorizado)
+    if (error.response?.status === 401) {
+      // Limpiar tokens
+      localStorage.removeItem("access_token")
+      localStorage.removeItem("refresh_token")
 
-export default axiosInstance;
+      // Opcional: redirigir a login
+      // window.location.href = '/login'
+    }
+
+    return Promise.reject(error)
+  },
+)
+
+export default apiClient

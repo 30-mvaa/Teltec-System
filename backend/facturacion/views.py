@@ -12,6 +12,12 @@ from .serializers import (
 )
 from users.permissions import IsAdminUser, IsClientServiceUser, IsPaymentUser
 
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+
+
+
+
 class PagoViewSet(viewsets.ModelViewSet):
     queryset = Pago.objects.all()
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -114,3 +120,10 @@ class NotificacionViewSet(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAdminUser | IsClientServiceUser | IsPaymentUser]
         return [permission() for permission in permission_classes]
+    
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def pagos_list(request):
+    pagos = Pago.objects.select_related('id_contrato__id_cliente', 'id_contrato__id_plan').all()
+    serializer = PagoSerializer(pagos, many=True)
+    return Response(serializer.data)
