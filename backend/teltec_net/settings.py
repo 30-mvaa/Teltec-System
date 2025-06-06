@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     # Third-party apps
     'rest_framework',
     'corsheaders',
-    'rest_framework_simplejwt',
     'django_filters',
     
 
@@ -120,30 +119,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CUSTOM USER MODEL
 AUTH_USER_MODEL = 'users.User'
 
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:3000",
+]
+
 # CORS HEADERS
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://192.168.0.100:3000",
-    
 ]
+CORS_ALLOW_CREDENTIALS = True
+
 
 # FRONTEND URL PARA RESTABLECER CONTRASEÑA
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',  # para permitir login sin token
-    ]
-}
-
-
-
-SIMPLE_JWT = {
-    'AUTH_HEADER_TYPES': ('Bearer',),
-    'TOKEN_OBTAIN_SERIALIZER': 'users.serializers.CustomTokenObtainPairSerializer',
+        'rest_framework.permissions.IsAuthenticated',
+    ],
 }
 
 
@@ -164,7 +161,8 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'  # Convertir string a booleano
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 # CORS HEADERS
-CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
+#CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:3000').split(',')
+
 
 # FRONTEND URL PARA RESTABLECER CONTRASEÑA
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
@@ -182,6 +180,14 @@ else:
     EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
     EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
     EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = False  # pon True si usas HTTPS en producción
+CSRF_COOKIE_SECURE = False     # igual aquí
+
+SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SAMESITE = "Lax"
+
 
 
 

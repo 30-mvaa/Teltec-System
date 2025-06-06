@@ -1,8 +1,8 @@
 
-
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -19,9 +19,8 @@ import {
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Edit, Search, Trash2, UserPlus } from "lucide-react"
-import axios from "axios"
 import toast from "react-hot-toast"
-import { useRouter } from "next/navigation";
+import { getCookie } from "@/utils/csrf"
 
 
 export default function ClientesPage() {
@@ -42,52 +41,41 @@ export default function ClientesPage() {
     fecha_registro: "",
   })
 
-  const handleDelete = async (id: number) => {
-  const confirm = window.confirm("¿Estás seguro de eliminar este cliente?");
-  if (!confirm) return;
+  const router = useRouter()
 
-  const token = localStorage.getItem("token");
-  const config = {
-    headers: { Authorization: `Bearer ${token}` },
-  };
+  useEffect(() => {
+    const rol = localStorage.getItem("rol")
 
-  try {
-    await axios.delete(`http://localhost:8000/api/clientes/clientes/${id}/`, config);
-    toast.success("Cliente eliminado correctamente");
-    fetchClientes(); // actualiza lista
-  } catch (error) {
-    console.error("Error al eliminar cliente", error);
-    toast.error("Error al eliminar cliente");
-  }
-};
-  const router = useRouter();
+    if (!rol) {
+      router.push("/login")
+    }
 
+    if (rol !== "administrador" && rol !== "atencion_cliente") {
+      router.push("/dashboard")
+    }
+  }, [router])
 
   const fetchClientes = async () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    console.error("❌ No se encontró token. Redirigiendo al login...");
-    router.push("/login");
-    return;
-  }
+    try {
+      const res = await fetch("http://localhost:8000/api/clientes/clientes/", {
+        method: "GET",
+        credentials: "include",
+      })
 
-  const config = {
-    headers: { Authorization: `Bearer ${token}` },
-  };
+      if (res.status === 401) {
+        toast.error("Sesión expirada. Inicia sesión nuevamente.")
+        localStorage.clear()
+        router.push("/login")
+        return
+      }
 
-  try {
-    const res = await axios.get("http://localhost:8000/api/clientes/clientes/", config);
-    setClientes(res.data);
-  } catch (error:any) {
-    console.error("❌ Error al obtener clientes:", error);
-    if (error.response?.status === 401) {
-      console.warn("⚠️ Token inválido. Redirigiendo al login...");
-      localStorage.clear();
-      router.push("/login");
+      const data = await res.json()
+      setClientes(data)
+    } catch (error) {
+      console.error("Error al obtener clientes:", error)
+      toast.error("Error al cargar clientes")
     }
   }
-};
-
 
   useEffect(() => {
     fetchClientes()
@@ -127,26 +115,67 @@ export default function ClientesPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null
-    const config = {
-      headers: { Authorization: `Bearer ${token}` },
+  e.preventDefault()
+  const url = currentCliente
+    ? `http://localhost:8000/api/clientes/clientes/${currentCliente.id_cliente}/`
+    : "http://localhost:8000/api/clientes/clientes/"
+  const method = currentCliente ? "PUT" : "POST"
+
+  const csrftoken = getCookie("csrftoken"); // ✅ obtener antes de fetch
+
+  try {
+    const res = await fetch(url, {
+      method,
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrftoken || "", // ✅ aquí se usa
+      },
+      body: JSON.stringify(formData),
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      throw new Error("Error al guardar cliente: " + errorText)
     }
-    try {
-      if (currentCliente) {
-        await axios.put(`http://localhost:8000/api/clientes/clientes/${currentCliente.id_cliente}/`, formData, config)
-        toast.success("Cliente actualizado correctamente")
-      } else {
-        await axios.post("http://localhost:8000/api/clientes/clientes/", formData, config)
-        toast.success("Cliente registrado correctamente")
-      }
-      fetchClientes()
-      setOpenDialog(false)
-    } catch (error) {
-      console.error("Error al guardar cliente", error)
-      toast.error("Error al guardar cliente")
-    }
+
+    toast.success(currentCliente ? "Cliente actualizado correctamente" : "Cliente registrado correctamente")
+    fetchClientes()
+    setOpenDialog(false)
+  } catch (error) {
+    console.error("Error al guardar cliente", error)
+    toast.error("Error al guardar cliente")
   }
+}
+
+
+  const handleDelete = async (id: number) => {
+  const confirm = window.confirm("¿Estás seguro de eliminar este cliente?")
+  if (!confirm) return
+
+  const csrftoken = getCookie("csrftoken") // ✅ obtener token
+
+  try {
+    const res = await fetch(`http://localhost:8000/api/clientes/clientes/${id}/`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: {
+        "X-CSRFToken": csrftoken || "", // ✅ enviarlo en headers
+      },
+    })
+
+    if (!res.ok) {
+      const errorText = await res.text()
+      throw new Error("Error al eliminar cliente: " + errorText)
+    }
+
+    toast.success("Cliente eliminado correctamente")
+    fetchClientes()
+  } catch (error) {
+    console.error("Error al eliminar cliente", error)
+    toast.error("Error al eliminar cliente")
+  }
+}
 
   return (
     <div className="space-y-6">
@@ -166,7 +195,9 @@ export default function ClientesPage() {
               <DialogHeader>
                 <DialogTitle>{currentCliente ? "Editar Cliente" : "Nuevo Cliente"}</DialogTitle>
                 <DialogDescription>
-                  {currentCliente ? "Actualice la información del cliente." : "Complete el formulario para registrar un nuevo cliente."}
+                  {currentCliente
+                    ? "Actualice la información del cliente."
+                    : "Complete el formulario para registrar un nuevo cliente."}
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit}>
@@ -270,7 +301,6 @@ export default function ClientesPage() {
                         <Button variant="destructive" size="sm" onClick={() => handleDelete(cliente.id_cliente)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
-
                       </div>
                     </TableCell>
                   </TableRow>

@@ -28,26 +28,28 @@ export default function RootLayout({
 */
 
 // En frontend/src/app/layout.tsx
-import type { Metadata } from "next";
-import { Inter } from 'next/font/google';
-import "./globals.css";
-import { AuthProvider } from "@/context/AuthContext";
-import { Toaster } from "react-hot-toast";
+// app/layout.tsx
 
-const inter = Inter({ subsets: ["latin"] });
+import "./globals.css"
+import { Inter } from "next/font/google"
+import type { Metadata } from "next"
+import { Toaster } from "react-hot-toast"
+import { AuthProvider } from "@/context/AuthContext"
+
+const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
   title: "Teltec Net - Sistema de Gestión",
   description: "Sistema de gestión para Teltec Net",
-};
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
-    <html lang="es">
+    <html lang="es" suppressHydrationWarning>
       <body className={inter.className}>
         <AuthProvider>
           {children}
@@ -55,5 +57,5 @@ export default function RootLayout({
         </AuthProvider>
       </body>
     </html>
-  );
+  )
 }

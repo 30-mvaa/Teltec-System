@@ -1,67 +1,87 @@
 
+
 "use client";
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useAuth } from "@/context/AuthContext";
 import toast from "react-hot-toast";
 import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import * as Yup from "yup";
 import { Formik, Form, Field, ErrorMessage } from "formik";
 
-
-
-// Esquema de validación
 const LoginSchema = Yup.object().shape({
   email: Yup.string().email("Email inválido").required("El email es obligatorio"),
-  password: Yup.string().required("La contraseña es obligatoria").min(4, "La contraseña debe tener al menos 4 caracteres"),
+  password: Yup.string().required("La contraseña es obligatoria").min(4, "Debe tener al menos 4 caracteres"),
 });
 
 export default function LoginPage() {
-  const { login, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [csrfToken, setCsrfToken] = useState("");
 
   useEffect(() => {
     setIsClient(true);
+    const rol = localStorage.getItem("rol");
+    if (rol) setIsAuthenticated(true);
+
+    fetch("http://localhost:8000/api/users/csrf-test/", {
+      credentials: "include",
+    })
+      .then(() => {
+        const csrf = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("csrftoken="))
+          ?.split("=")[1];
+        if (csrf) setCsrfToken(csrf);
+      })
+      .catch(() => toast.error("No se pudo obtener CSRF"));
   }, []);
 
   useEffect(() => {
-    if (isClient && !isLoading && isAuthenticated) {
-      console.log("Usuario ya autenticado, redirigiendo al dashboard");
-      setTimeout(() => {
-        router.push("/dashboard");
-      }, 100);
-    }
-  }, [isAuthenticated, isLoading, isClient, router]);
-
-  console.log("Estado antes de login:", { isAuthenticated, isLoading });
+    if (isClient && isAuthenticated) router.push("/dashboard");
+  }, [isAuthenticated, isClient, router]);
 
   const handleSubmit = async (values: { email: string; password: string }) => {
-    console.log("Enviando formulario de login...", values);
     setIsSubmitting(true);
     try {
-      await login(values.email, values.password);
-      toast.success("Inicio de sesión exitoso");
-      setTimeout(() => {
+      const res = await fetch("http://localhost:8000/api/users/session-login/", {
+
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,
+        },
+        body: JSON.stringify({
+          username: values.email,
+          password: values.password,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        localStorage.setItem("rol", data.rol);
+        localStorage.setItem("email", data.email);
+        localStorage.setItem("nombre", data.name);
+        localStorage.setItem("user_id", data.user_id);
+        toast.success("Inicio de sesión exitoso");
         router.push("/dashboard");
-      }, 100);
-    } catch (error: any) {
-      console.error("Error en login:", error);
-      const errorMessage =
-        error.response?.data?.detail ||
-        error.response?.data?.error ||
-        "Error al iniciar sesión. Por favor, verifica tus credenciales.";
-      toast.error(errorMessage);
+      } else {
+        toast.error(data.error || "Credenciales incorrectas");
+      }
+    } catch (err) {
+      toast.error("Error al conectar con el servidor");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isLoading || (isAuthenticated && isClient)) {
+  if (!isClient || (isAuthenticated && isClient)) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -82,12 +102,7 @@ export default function LoginPage() {
 
       <div className="w-full max-w-md rounded-lg border border-gray-800 bg-[#1a2236] p-8 shadow-xl">
         <h2 className="mb-6 text-center text-2xl font-bold text-white">Iniciar Sesión</h2>
-
-        <Formik
-          initialValues={{ email: "", password: "" }}
-          validationSchema={LoginSchema}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={{ email: "", password: "" }} validationSchema={LoginSchema} onSubmit={handleSubmit}>
           {() => (
             <Form className="space-y-6">
               <div className="space-y-2">
@@ -107,7 +122,6 @@ export default function LoginPage() {
                   <ErrorMessage name="email" component="div" className="mt-1 text-sm text-red-400" />
                 </div>
               </div>
-
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label htmlFor="password" className="block text-sm font-medium text-gray-300">
@@ -137,7 +151,6 @@ export default function LoginPage() {
                   <ErrorMessage name="password" component="div" className="mt-1 text-sm text-red-400" />
                 </div>
               </div>
-
               <button
                 type="submit"
                 disabled={isSubmitting}
@@ -145,18 +158,9 @@ export default function LoginPage() {
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
-                    <svg
-                      className="mr-2 h-5 w-5 animate-spin text-white"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
+                    <svg className="mr-2 h-5 w-5 animate-spin text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                     Iniciando sesión...
                   </div>

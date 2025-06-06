@@ -30,14 +30,22 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 export function DashboardSidebar() {
   const pathname = usePathname()
   const router = useRouter()
-  const [userRole] = useState("administrador") // En una app real, esto vendría de un contexto de autenticación
+  const [userRole] = useState("administrador")
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const isActive = (path: string) => pathname === path
 
-  const handleLogout = () => {
-    // En una app real, aquí se haría el logout
-    router.push("/login")
+  const handleLogout = async () => {
+    try {
+      await fetch("http://localhost:8000/api/session-logout/", {
+        method: "POST",
+        credentials: "include",
+      })
+      localStorage.clear()
+      router.push("/login")
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error)
+    }
   }
 
   const menuItems = [
@@ -73,16 +81,13 @@ export function DashboardSidebar() {
     },
   ]
 
-  // Filtrar elementos del menú según el rol del usuario
   const filteredMenuItems = menuItems.filter((item) => item.roles.includes(userRole))
 
-  // Componente de menú que se reutiliza en la barra lateral y en el menú móvil
   const MenuItems = () => (
     <>
       {filteredMenuItems.map((item) => (
         <SidebarMenuItem key={item.path}>
           <SidebarMenuButton
-            asChild
             isActive={isActive(item.path)}
             tooltip={item.title}
             onClick={() => setMobileMenuOpen(false)}
@@ -99,7 +104,6 @@ export function DashboardSidebar() {
 
   return (
     <>
-      {/* Sidebar para pantallas medianas y grandes */}
       <Sidebar className="hidden md:block">
         <SidebarHeader className="flex h-14 items-center border-b px-4">
           <Link href="/dashboard" className="flex items-center gap-2 font-semibold">
@@ -132,8 +136,6 @@ export function DashboardSidebar() {
             <DropdownMenuContent align="end" className="w-56">
               <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              
-              <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Cerrar Sesión</span>
@@ -143,7 +145,6 @@ export function DashboardSidebar() {
         </SidebarFooter>
       </Sidebar>
 
-      {/* Header móvil con menú desplegable */}
       <div className="sticky top-0 z-20 flex h-14 items-center justify-between border-b bg-background px-4 md:hidden">
         <div className="flex items-center gap-2">
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>

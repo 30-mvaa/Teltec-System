@@ -24,7 +24,9 @@ class ClienteViewSet(viewsets.ModelViewSet):
             permission_classes = [IsAdminUser | IsClientServiceUser]
         else:
             permission_classes = [IsAdminUser | IsClientServiceUser | IsPaymentUser]
+
         return [permission() for permission in permission_classes]
+
 
     @action(detail=False, methods=['get'])
     def activos(self, request):

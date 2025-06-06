@@ -1,16 +1,16 @@
-
-
-'use client'
+"use client"
 
 import { createContext, useContext, useEffect, useState, ReactNode } from "react"
-import axios from "axios"
-import { jwtDecode } from "jwt-decode"
+import { useRouter } from "next/navigation"
+import { getCSRFToken, getCookie } from "@/utils/csrf"
+
 
 interface User {
   id: number
   email: string
   name: string
   rol: string
+  //rol: "administrador" | "atencion_cliente" | "cobros"
 }
 
 interface AuthContextType {
@@ -31,101 +31,85 @@ export const useAuth = () => {
   return context
 }
 
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
 
-  // useEffect(() => {
-  //   const token = localStorage.getItem("token")
-  //   const email = localStorage.getItem("email")
-  //   const role = localStorage.getItem("rol")
-  //   const name = localStorage.getItem("nombre")
-  //   const id = localStorage.getItem("user_id")
-
-  //   if (token && email && role && name && id) {
-  //     setUser({
-  //       id: parseInt(id),
-  //       email,
-  //       role,
-  //       name,
-  //     })
-  //     setIsAuthenticated(true)
-  //   }
-
-  //   setIsLoading(false)
-  // }, [])
   useEffect(() => {
-  const token = localStorage.getItem("token");
-  const email = localStorage.getItem("email");
-  const rol = localStorage.getItem("rol");
-  const name = localStorage.getItem("nombre");
-  const id = localStorage.getItem("user_id");
+    const rol = localStorage.getItem("rol")
+    const email = localStorage.getItem("email")
+    const name = localStorage.getItem("nombre")
+    const id = localStorage.getItem("user_id")
 
-  // Si alguno está ausente, se borra todo para evitar errores
-  if (!token || !rol || !email || !id) {
-    localStorage.clear();
-    setIsAuthenticated(false);
-    setUser(null);
-    setIsLoading(false);
-    return;
-  }
+    if (!rol || !email || !id) {
+      localStorage.clear()
+      setUser(null)
+      setIsAuthenticated(false)
+      setIsLoading(false)
+      return
+    }
 
-  setUser({
-    id: parseInt(id),
-    email,
-    rol,
-    name,
-  });
-  setIsAuthenticated(true);
-  setIsLoading(false);
-}, []);
-
+    setUser({
+      id: parseInt(id),
+      email,
+      rol,
+      name: name || "",
+    })
+    setIsAuthenticated(true)
+    setIsLoading(false)
+  }, [])
 
   const login = async (email: string, password: string) => {
-  try {
-    const response = await axios.post("http://localhost:8000/api/users/login/", {
-    email,
-    password,
-});
+  await getCSRFToken() // Obligatorio antes de hacer login
 
+  const csrfToken = getCookie("csrftoken")
+  if (!csrfToken) throw new Error("No se pudo obtener el token CSRF")
 
-    const data = response.data;
-    const decoded: any = jwtDecode(data.access); // decodifica JWT
-   
+  const res = await fetch("http://localhost:8000/api/session-login/", {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRFToken": csrfToken,
+    },
+    body: JSON.stringify({ username: email, password }),
+  })
 
+  const data = await res.json()
 
-localStorage.setItem("token", data.access);
-localStorage.setItem("email", data.email);
-localStorage.setItem("rol", data.rol);
-localStorage.setItem("nombre", data.name);
-localStorage.setItem("user_id", data.user_id);
-
-    // Actualiza el estado del usuario en React
-    setUser({
-      id: decoded.user_id,
-      email: decoded.email,
-      name: `${decoded.first_name || ""} ${decoded.last_name || ""}`,
-      rol: decoded.rol,
-    });
-
-    setIsAuthenticated(true);
-
-    // Redirecciona manualmente
-    window.location.href = "/dashboard";
-  } catch (error: any) {
-    console.error("Error en login:", error);
-    throw error;
+  if (!res.ok) {
+    throw new Error(data.error || "Error al iniciar sesión")
   }
-};
 
+  localStorage.setItem("rol", data.rol)
+  localStorage.setItem("email", data.email)
+  localStorage.setItem("nombre", data.name)
+  localStorage.setItem("user_id", data.user_id)
 
+  setUser({
+    id: data.user_id,
+    email: data.email,
+    name: data.name,
+    rol: data.rol,
+  })
 
-  const logout = () => {
+  setIsAuthenticated(true)
+  router.push("/dashboard")
+}
+
+  const logout = async () => {
+    await fetch("http://localhost:8000/api/session-logout/", {
+      method: "POST",
+      credentials: "include",
+    })
+
     localStorage.clear()
     setUser(null)
     setIsAuthenticated(false)
-    window.location.href = "/login"
+    router.push("/login")
   }
 
   const value: AuthContextType = {
