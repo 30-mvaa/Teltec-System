@@ -1,5 +1,3 @@
-# backend/clientes/views.py
-
 from rest_framework import viewsets, filters, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -17,16 +15,13 @@ class ClienteViewSet(viewsets.ModelViewSet):
     filterset_fields = ['estado', 'sector']
     search_fields = ['cedula', 'nombres', 'apellidos', 'email', 'telefono']
     ordering_fields = ['apellidos', 'nombres', 'fecha_registro']
-    permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
             permission_classes = [IsAdminUser | IsClientServiceUser]
         else:
             permission_classes = [IsAdminUser | IsClientServiceUser | IsPaymentUser]
-
         return [permission() for permission in permission_classes]
-
 
     @action(detail=False, methods=['get'])
     def activos(self, request):

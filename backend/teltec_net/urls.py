@@ -155,11 +155,21 @@ from rest_framework.routers import DefaultRouter
 from users.views import UserViewSet  # ✅ Asegúrate que este import no falle
 
 def home(request):
-    return HttpResponse(""" ... TU HTML AQUÍ ... """)
+    return HttpResponse("""
+    <h1 style="text-align: center; margin-top: 50px;">Bienvenido a Teltec Net API</h1>
+    <div style="text-align: center; margin-top: 20px;">
+        <p>Accede a:</p>
+        <ul style="list-style: none; padding: 0;">
+            <li><a href='/admin/'>Panel de Administración</a></li>
+            <li><a href='/api/clientes/clientes/'>API de Clientes</a></li>
+            <li><a href='/api/facturacion/pagos/'>API de Pagos</a></li>
+        </ul>
+    </div>
+    """)
 
 # ✅ Registrar el router
 router = DefaultRouter()
-router.register(r'users', UserViewSet, basename='user')
+router.register(r'usuarios', UserViewSet, basename='user')
 
 urlpatterns = [
     path('', home, name='home'),
@@ -173,6 +183,9 @@ urlpatterns = [
     path('api/clientes/', include('clientes.urls')),
     path('api/facturacion/', include('facturacion.urls')),
     path('api/dashboard/', include('dashboard.urls')),
+    path('api/', include('facturacion.urls')),
+    path('api/', include('clientes.urls')),
+
 ]
 
 # ✅ Servir archivos en desarrollo

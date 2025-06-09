@@ -20,7 +20,7 @@ export default function UsuariosTab() {
   const [currentUsuario, setCurrentUsuario] = useState<any>(null)
 
   const fetchUsuarios = async () => {
-    const res = await fetch("http://localhost:8000/api/users/", { credentials: "include" })
+    const res = await fetch("http://localhost:8000/api/users/usuarios/", { credentials: "include" })
     const data = await res.json()
     setUsuarios(data)
   }
@@ -81,7 +81,7 @@ export default function UsuariosTab() {
 
       let res
       if (currentUsuario) {
-        res = await fetch(`http://localhost:8000/api/users/${currentUsuario.id}/`, {
+        res = await fetch(`http://localhost:8000/api/users/usuarios/${currentUsuario.id}/`, {
           method: "PUT",
           credentials: "include",
           headers: {
@@ -91,7 +91,7 @@ export default function UsuariosTab() {
           body: JSON.stringify(payload),
         })
       } else {
-        res = await fetch("http://localhost:8000/api/users/", {
+        res = await fetch("http://localhost:8000/api/users/usuarios/", {
           method: "POST",
           credentials: "include",
           headers: {
@@ -124,7 +124,7 @@ export default function UsuariosTab() {
         .find((row) => row.startsWith("csrftoken="))
         ?.split("=")[1]
 
-      const res = await fetch(`http://localhost:8000/api/users/${id}/`, {
+      const res = await fetch(`http://localhost:8000/api/users/usuarios/${id}/`, {
         method: "DELETE",
         credentials: "include",
         headers: {

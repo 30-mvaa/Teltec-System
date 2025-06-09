@@ -15,13 +15,13 @@ export default function ConfiguracionPage() {
 
   useEffect(() => {
     
-    if (!isLoading && user) {
-      console.log("ROL ACTUAL:", user.rol);
-      if (user.rol !== "administrador") {
-        router.push("/dashboard")
+    console.log("ROL ACTUAL:", user?.rol)
+      if (!isLoading && user?.rol !== "administrador") {
+        router.push("/dashboard") // redirige si no es admin
       }
-    }
-  }, [user, isLoading, router])
+    }, [user, isLoading, router])
+
+  if (isLoading) return null
 
   if (isLoading || user?.rol !== "administrador") return null;
     console.log("Usuario completo:", user);

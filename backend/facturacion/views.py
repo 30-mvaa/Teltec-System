@@ -127,3 +127,4 @@ def pagos_list(request):
     pagos = Pago.objects.select_related('id_contrato__id_cliente', 'id_contrato__id_plan').all()
     serializer = PagoSerializer(pagos, many=True)
     return Response(serializer.data)
+

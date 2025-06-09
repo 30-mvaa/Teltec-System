@@ -2,6 +2,7 @@
 
 from rest_framework import serializers
 from .models import Cliente, Plan, Contrato
+from .models import Plan
 
 class ClienteSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,3 +38,7 @@ class ContratoCreateSerializer(serializers.ModelSerializer):
         if Contrato.objects.filter(id_cliente=data['id_cliente'], estado='activo').exists():
             raise serializers.ValidationError("Este cliente ya tiene un contrato activo.")
         return data
+class PlanSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Plan
+        fields = '__all__'

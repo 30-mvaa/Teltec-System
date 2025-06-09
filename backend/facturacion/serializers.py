@@ -3,6 +3,7 @@ from .models import Pago, Factura, Notificacion
 from clientes.serializers import ContratoSerializer
 
 
+
 class PagoSerializer(serializers.ModelSerializer):
     cliente = serializers.SerializerMethodField()
     cedula = serializers.SerializerMethodField()
@@ -55,3 +56,4 @@ class NotificacionSerializer(serializers.ModelSerializer):
     
     def get_cliente_nombre(self, obj):
         return f"{obj.id_cliente.nombres} {obj.id_cliente.apellidos}"
+

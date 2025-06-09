@@ -89,3 +89,4 @@ class Notificacion(models.Model):
         ordering = ['-fecha_envio']
         verbose_name = "Notificación"
         verbose_name_plural = "Notificaciones"
+

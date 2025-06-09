@@ -5,8 +5,8 @@ from .views import ClienteViewSet, PlanViewSet, ContratoViewSet
 
 router = DefaultRouter()
 router.register(r'clientes', ClienteViewSet)
-router.register(r'planes', PlanViewSet)
 router.register(r'contratos', ContratoViewSet)
+router.register(r'planes', PlanViewSet, basename='plan')
 
 urlpatterns = [
     path('', include(router.urls)),

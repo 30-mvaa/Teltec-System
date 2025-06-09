@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const csrfToken = getCookie("csrftoken")
   if (!csrfToken) throw new Error("No se pudo obtener el token CSRF")
 
-  const res = await fetch("http://localhost:8000/api/session-login/", {
+  const res = await fetch("http://localhost:8000/api/users/session-login/", {
     method: "POST",
     credentials: "include",
     headers: {
@@ -101,7 +101,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 }
 
   const logout = async () => {
-    await fetch("http://localhost:8000/api/session-logout/", {
+    await fetch("http://localhost:8000/api/users/session-logout/", {
       method: "POST",
       credentials: "include",
     })

@@ -8,6 +8,7 @@ router.register(r'pagos', PagoViewSet)
 router.register(r'facturas', FacturaViewSet)
 router.register(r'notificaciones', NotificacionViewSet)
 
+
 urlpatterns = [
     path('', include(router.urls)),
     path("pagos/", pagos_list, name="pagos-list"),
